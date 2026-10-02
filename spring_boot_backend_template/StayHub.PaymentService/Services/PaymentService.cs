@@ -33,13 +33,19 @@ namespace StayHub.PaymentService.Services
             _logger = logger;
         }
 
-        public async Task<PaymentResponseDto> CreateOrderAsync(PaymentRequestDto dto, string? bearerToken)
+        public async Task<PaymentResponseDto> CreateOrderAsync(
+            PaymentRequestDto dto,
+            string? bearerToken)
         {
             // 1. Fetch booking details from Spring Boot monolith via REST
-            var booking = await _springBootClient.GetBookingByIdAsync(dto.BookingId, bearerToken);
+            var booking = await _springBootClient.GetBookingByIdAsync(
+                dto.BookingId,
+                bearerToken);
+
             if (booking == null)
             {
-                throw new KeyNotFoundException($"Booking with ID {dto.BookingId} was not found in Spring Boot system.");
+                throw new KeyNotFoundException(
+                    $"Booking with ID {dto.BookingId} was not found in Spring Boot system.");
             }
 
             // 2. Check for existing payment record
@@ -50,7 +56,8 @@ namespace StayHub.PaymentService.Services
             {
                 if (existingPayment.Status == PaymentStatus.SUCCESS)
                 {
-                    throw new InvalidOperationException("Payment has already been completed for this booking.");
+                    throw new InvalidOperationException(
+                        "Payment has already been completed for this booking.");
                 }
 
                 // Delete stale pending payment order
@@ -60,13 +67,21 @@ namespace StayHub.PaymentService.Services
 
             // 3. Calculate charge amount (business rule cap at 15000)
             decimal chargeAmount = booking.TotalAmount;
+
             if (chargeAmount > 15000m)
             {
                 chargeAmount = 15000m;
             }
 
-            string keyId = _configuration["Razorpay:KeyId"] ?? "rzp_test_TNMQvYTPsR973B";
-            string keySecret = _configuration["Razorpay:KeySecret"] ?? "YoESkUkqujw1zE5Hk4yicxA6";
+            // Read Razorpay credentials from configuration.
+            // No credentials are hardcoded in source code.
+            string keyId = _configuration["Razorpay:KeyId"]
+                ?? throw new InvalidOperationException(
+                    "Razorpay KeyId is not configured.");
+
+            string keySecret = _configuration["Razorpay:KeySecret"]
+                ?? throw new InvalidOperationException(
+                    "Razorpay KeySecret is not configured.");
 
             string razorpayOrderId;
 
@@ -74,10 +89,10 @@ namespace StayHub.PaymentService.Services
             {
                 // Instantiate Razorpay Client
                 var razorpayClient = new RazorpayClient(keyId, keySecret);
-                
+
                 var orderOptions = new Dictionary<string, object>
                 {
-                    { "amount", Convert.ToInt64(chargeAmount * 100) }, // Razorpay accepts amount in paise
+                    { "amount", Convert.ToInt64(chargeAmount * 100) },
                     { "currency", "INR" },
                     { "receipt", $"txn_b_{dto.BookingId}_{DateTime.UtcNow.Ticks}" }
                 };
@@ -87,9 +102,15 @@ namespace StayHub.PaymentService.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Razorpay API error while creating order for booking {BookingId}", dto.BookingId);
-                // Fallback / mock order ID for testing when Razorpay API key is inactive/unreachable
-                razorpayOrderId = $"order_mock_{Guid.NewGuid().ToString("N")[..12]}";
+                _logger.LogError(
+                    ex,
+                    "Razorpay API error while creating order for booking {BookingId}",
+                    dto.BookingId);
+
+                // Fallback / mock order ID for testing when Razorpay API
+                // key is inactive or unreachable
+                razorpayOrderId =
+                    $"order_mock_{Guid.NewGuid().ToString("N")[..12]}";
             }
 
             // 4. Save Payment entity in MySQL
@@ -113,26 +134,40 @@ namespace StayHub.PaymentService.Services
             return MapToDto(payment);
         }
 
-        public async Task<PaymentResponseDto> VerifyPaymentAsync(PaymentVerifyRequestDto dto, string? bearerToken)
+        public async Task<PaymentResponseDto> VerifyPaymentAsync(
+            PaymentVerifyRequestDto dto,
+            string? bearerToken)
         {
-            string keySecret = _configuration["Razorpay:KeySecret"] ?? "YoESkUkqujw1zE5Hk4yicxA6";
+            string keySecret = _configuration["Razorpay:KeySecret"]
+                ?? throw new InvalidOperationException(
+                    "Razorpay KeySecret is not configured.");
 
             // 1. HMAC-SHA256 Signature Verification
-            bool isValid = VerifyRazorpaySignature(dto.RazorpayOrderId, dto.RazorpayPaymentId, dto.RazorpaySignature, keySecret);
+            bool isValid = VerifyRazorpaySignature(
+                dto.RazorpayOrderId,
+                dto.RazorpayPaymentId,
+                dto.RazorpaySignature,
+                keySecret);
 
             if (!isValid)
             {
-                _logger.LogWarning("Invalid Razorpay signature submitted for OrderId {OrderId}", dto.RazorpayOrderId);
-                throw new InvalidOperationException("Invalid Razorpay payment signature.");
+                _logger.LogWarning(
+                    "Invalid Razorpay signature submitted for OrderId {OrderId}",
+                    dto.RazorpayOrderId);
+
+                throw new InvalidOperationException(
+                    "Invalid Razorpay payment signature.");
             }
 
             // 2. Fetch Payment record
             var payment = await _dbContext.Payments
-                .FirstOrDefaultAsync(p => p.RazorpayOrderId == dto.RazorpayOrderId);
+                .FirstOrDefaultAsync(
+                    p => p.RazorpayOrderId == dto.RazorpayOrderId);
 
             if (payment == null)
             {
-                throw new KeyNotFoundException($"Payment with Razorpay Order ID {dto.RazorpayOrderId} not found.");
+                throw new KeyNotFoundException(
+                    $"Payment with Razorpay Order ID {dto.RazorpayOrderId} not found.");
             }
 
             // 3. Update payment status
@@ -145,35 +180,47 @@ namespace StayHub.PaymentService.Services
             await _dbContext.SaveChangesAsync();
 
             // 4. Notify Spring Boot Monolith to set BookingStatus = CONFIRMED
-            await _springBootClient.ConfirmBookingStatusAsync(payment.BookingId, bearerToken);
+            await _springBootClient.ConfirmBookingStatusAsync(
+                payment.BookingId,
+                bearerToken);
 
             return MapToDto(payment);
         }
 
         public async Task<IEnumerable<PaymentResponseDto>> GetAllPaymentsAsync()
         {
-            var payments = await _dbContext.Payments.AsNoTracking().ToListAsync();
+            var payments = await _dbContext.Payments
+                .AsNoTracking()
+                .ToListAsync();
+
             return payments.Select(MapToDto);
         }
 
         public async Task<PaymentResponseDto> GetPaymentByIdAsync(long id)
         {
             var payment = await _dbContext.Payments.FindAsync(id);
+
             if (payment == null)
             {
-                throw new KeyNotFoundException($"Payment with ID {id} not found.");
+                throw new KeyNotFoundException(
+                    $"Payment with ID {id} not found.");
             }
+
             return MapToDto(payment);
         }
 
-        public async Task<PaymentResponseDto> GetPaymentByBookingIdAsync(long bookingId)
+        public async Task<PaymentResponseDto> GetPaymentByBookingIdAsync(
+            long bookingId)
         {
-            var payment = await _dbContext.Payments.AsNoTracking()
-                .FirstOrDefaultAsync(p => p.BookingId == bookingId);
+            var payment = await _dbContext.Payments
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    p => p.BookingId == bookingId);
 
             if (payment == null)
             {
-                throw new KeyNotFoundException($"Payment for booking ID {bookingId} not found.");
+                throw new KeyNotFoundException(
+                    $"Payment for booking ID {bookingId} not found.");
             }
 
             return MapToDto(payment);
@@ -182,34 +229,57 @@ namespace StayHub.PaymentService.Services
         public async Task DeletePaymentAsync(long id)
         {
             var payment = await _dbContext.Payments.FindAsync(id);
+
             if (payment == null)
             {
-                throw new KeyNotFoundException($"Payment with ID {id} not found.");
+                throw new KeyNotFoundException(
+                    $"Payment with ID {id} not found.");
             }
 
             _dbContext.Payments.Remove(payment);
             await _dbContext.SaveChangesAsync();
         }
 
-        private static bool VerifyRazorpaySignature(string orderId, string paymentId, string signature, string secret)
+        private static bool VerifyRazorpaySignature(
+            string orderId,
+            string paymentId,
+            string signature,
+            string secret)
         {
-            if (string.IsNullOrEmpty(signature)) return false;
-            if (signature.Equals("mock_signature", StringComparison.OrdinalIgnoreCase)) return true; // Test fallback helper
+            if (string.IsNullOrEmpty(signature))
+            {
+                return false;
+            }
+
+            if (signature.Equals(
+                    "mock_signature",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
 
             string payload = $"{orderId}|{paymentId}";
-            using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
-            byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
-            
+
+            using var hmac = new HMACSHA256(
+                Encoding.UTF8.GetBytes(secret));
+
+            byte[] hashBytes = hmac.ComputeHash(
+                Encoding.UTF8.GetBytes(payload));
+
             var sb = new StringBuilder();
+
             foreach (byte b in hashBytes)
             {
                 sb.Append(b.ToString("x2"));
             }
 
-            return sb.ToString().Equals(signature, StringComparison.OrdinalIgnoreCase);
+            return sb.ToString().Equals(
+                signature,
+                StringComparison.OrdinalIgnoreCase);
         }
 
-        private static PaymentResponseDto MapToDto(Models.Payment payment)
+        private static PaymentResponseDto MapToDto(
+            Models.Payment payment)
         {
             return new PaymentResponseDto
             {

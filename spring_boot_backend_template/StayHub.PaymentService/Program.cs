@@ -16,12 +16,15 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // 1. Add MySQL EF Core DbContext
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=localhost;Port=3306;Database=stayhub;User=root;Password=root;";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Database connection string is not configured.");
 
 builder.Services.AddDbContext<PaymentDbContext>(options =>
 {
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString));
 });
 
 // 2. Register Inter-Service HTTP Client for Spring Boot
@@ -42,20 +45,30 @@ builder.Services.AddCors(options =>
 });
 
 // 5. Configure JWT Authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "MySuperSecretKeyForStayHubJwtAuthentication2026";
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException(
+        "JWT secret is not configured.");
+
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwtSecret)),
+
         ValidateIssuer = false,
         ValidateAudience = false
     };
@@ -64,18 +77,21 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
 // 6. Configure Swagger/OpenAPI with JWT Authorize support
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "StayHub Payment Microservice API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "StayHub Payment Microservice API",
         Version = "v1",
-        Description = "ASP.NET Core Payment Microservice for StayHub PG Booking System"
+        Description =
+            "ASP.NET Core Payment Microservice for StayHub PG Booking System"
     });
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -85,16 +101,18 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your valid JWT token."
+        Description =
+            "Enter 'Bearer' [space] and then your valid JWT token."
     });
 
-    c.AddSecurityRequirement((doc) => new OpenApiSecurityRequirement
-    {
+    c.AddSecurityRequirement(doc =>
+        new OpenApiSecurityRequirement
         {
-            new OpenApiSecuritySchemeReference("Bearer"),
-            new List<string>()
-        }
-    });
+            {
+                new OpenApiSecuritySchemeReference("Bearer"),
+                new List<string>()
+            }
+        });
 });
 
 var app = builder.Build();
@@ -104,13 +122,18 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Enable Swagger in Development and Production for interview demonstration
 app.UseSwagger();
+
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "StayHub Payment Service API v1");
+    c.SwaggerEndpoint(
+        "/swagger/v1/swagger.json",
+        "StayHub Payment Service API v1");
+
     c.RoutePrefix = "swagger";
 });
 
 app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
