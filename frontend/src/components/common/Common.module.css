@@ -1,0 +1,245 @@
+/* Loading Spinner */
+.spinnerOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  width: 100%;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--primary);
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.spinnerText {
+  margin-top: 1rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background-color: #ffffff;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.emptyIcon {
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.emptyTitle {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.emptyDescription {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 400px;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.badgeActive, .badgeSuccess, .badgeConfirmed, .badgeRoleAdmin {
+  background-color: var(--success-light);
+  color: #065f46;
+}
+
+.badgePending, .badgeWarning {
+  background-color: var(--warning-light);
+  color: #92400e;
+}
+
+.badgeInactive, .badgeDanger, .badgeCancelled, .badgeFailed {
+  background-color: var(--danger-light);
+  color: #991b1b;
+}
+
+.badgeInfo, .badgeCheckedIn, .badgeRoleOwner {
+  background-color: var(--info-light);
+  color: #1e40af;
+}
+
+.badgeRoleCustomer {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+/* Modal */
+.modalBackdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background-color: #ffffff;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  animation: scaleUp 0.2s ease-out;
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modalHeader {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modalBody {
+  padding: 1.5rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.modalFooter {
+  padding: 1rem 1.5rem;
+  background-color: var(--bg-main);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Buttons */
+.btn {
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.btnPrimary {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.btnPrimary:hover { background-color: var(--primary-hover); }
+
+.btnSecondary {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btnSecondary:hover { background-color: var(--bg-subtle); }
+
+.btnDanger {
+  background-color: var(--danger);
+  color: #ffffff;
+}
+
+.btnDanger:hover { background-color: #dc2626; }
+
+.btnSm {
+  padding: 4px 10px;
+  font-size: 0.825rem;
+}
+
+/* Card */
+.card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* Table */
+.tableResponsive {
+  width: 100%;
+  overflow-x: auto;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.table th {
+  background-color: var(--bg-main);
+  padding: 12px 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bg-main);
+}

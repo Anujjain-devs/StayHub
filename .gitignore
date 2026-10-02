@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production / Build outputs
+dist/
+build/
+target/
+*.class
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+
+# Eclipse / STS
+.metadata/
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# VS Code
+.vscode/
+
+# Archives and large backups
+*.zip
+*.tar.gz
+*.rar
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+~$*
+

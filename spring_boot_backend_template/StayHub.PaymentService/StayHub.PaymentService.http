@@ -1,0 +1,6 @@
+@StayHub.PaymentService_HostAddress = http://localhost:5074
+
+GET {{StayHub.PaymentService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

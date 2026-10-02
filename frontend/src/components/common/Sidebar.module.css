@@ -1,0 +1,48 @@
+.sidebar {
+  width: 240px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--border-color);
+  min-height: calc(100vh - 64px);
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--border-radius);
+  color: var(--text-muted);
+  font-size: 0.925rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.menuItem:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.activeMenuItem {
+  background-color: var(--primary);
+  color: #ffffff !important;
+}
+
+.activeMenuItem:hover {
+  background-color: var(--primary-hover) !important;
+}

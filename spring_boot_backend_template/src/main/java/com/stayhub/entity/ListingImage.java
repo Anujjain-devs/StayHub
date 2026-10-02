@@ -1,0 +1,30 @@
+package com.stayhub.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "listing_images")
+public class ListingImage extends BaseEntity {
+
+    @Column(nullable = false, length = 200)
+    private String imageName;
+
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @ManyToOne
+    @JoinColumn(name = "pg_listing_id", nullable = false)
+    private PgListing pgListing;
+}

@@ -1,0 +1,58 @@
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.95rem;
+  color: #ffffff;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.success {
+  background-color: var(--success);
+}
+
+.error {
+  background-color: var(--danger);
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.message {
+  font-weight: 500;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  margin-left: 8px;
+  opacity: 0.8;
+}
+
+.closeBtn:hover {
+  opacity: 1;
+}
